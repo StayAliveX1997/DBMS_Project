@@ -1,5 +1,5 @@
 # depslib dependency file v1.0
-1672260957 source:h:\iti\cplusplus\project\dbmsv2\main.cpp
+1672386624 source:h:\iti\cplusplus\project\v2\dbms\main.cpp
 	<iostream>
 	<conio.h>
 	<vector>

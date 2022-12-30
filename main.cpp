@@ -31,6 +31,20 @@ class Table
                 it++;
         }
     }
+    bool ColumnNameSearching(string _name)
+    {
+        for(int i = 0; i < (this->columnArray.size()) ; i++)
+        {
+            if(_name.compare(this->columnArray[i][0]))
+            {
+                cout<<this->columnArray[i][0];
+                getch();
+                return true;
+            }
+
+        }
+        return false;
+    }
 
 };
 class Database
@@ -46,10 +60,13 @@ public:
     static void ShowDatabase()
     {
         system("cls");
-        cout<<"Database Names"<<endl;
-        cout<<"==============================="<<endl;
+        cout<<"Existing Databases"<<endl;
+        cout<<"====================="<<endl;
         for(int  i = 0;i < databaseList.size() ; i++)
             cout<<databaseList[i].name<<endl;
+        cout<<"-----------------------"<<endl;
+        cout<<"Enter any key to return"<<endl;
+        getch();
     }
     static bool DatabaseNameSearching(string _name)
     {
@@ -60,12 +77,12 @@ public:
         }
         return false;
     }
-    static Database SearchedDatabase(string _name)
+    static Database* SearchedDatabase(string _name)
     {
         for(int i = 0; i < databaseList.size();i++)
         {
             if(_name.compare(databaseList[i].name) == 0)
-                return databaseList[i];
+                return &databaseList[i];
         }
     }
     static void DeleteDatabase(string _name)
@@ -89,30 +106,30 @@ public:
         }
         return false;
     }
-    static Table SearchedTable(string tableName,Database currentDatabase)
+    Table* SearchedTable(string tableName)
     {
-        for(int i = 0; i < currentDatabase.tableList.size();i++)
+        for(int i = 0; i < this->tableList.size();i++)
         {
-            if(tableName.compare(currentDatabase.tableList[i].name) == 0)
-                return currentDatabase.tableList[i];
+            if(tableName.compare(this->tableList[i].name) == 0)
+                return & this->tableList[i];
         }
     }
     void ShowTable()
     {
-        cout<<"Tables Name of : "<<this->name<<endl;
+        cout<<"Tables of Database : "<<this->name<<endl;
         cout<<"==============================="<<endl;
-        for(int i = 0; i < this->tableList.size(); i++)
-            cout<<this->tableList[i].name<<endl;
+        for(int i = 0; i < tableList.size(); i++)
+            cout<<tableList[i].name<<endl;
         cout<<"Press any key to return"<<endl;
     }
-    static void DeleteTable(string _name,Database currentDatabase)
+    void DeleteTable(string _name)
     {
-        auto it = currentDatabase.tableList.begin();
-        for(int i = 0 ;i < currentDatabase.tableList.size(); i++)
+        auto it = this->tableList.begin();
+        for(int i = 0 ;i < this->tableList.size(); i++)
         {
-            if(_name.compare(currentDatabase.tableList[i].name) == 0)
+            if(_name.compare(this->tableList[i].name) == 0)
             {
-                currentDatabase.tableList.erase(it);
+                this->tableList.erase(it);
                 break;
             }
             else
@@ -120,215 +137,7 @@ public:
         }
     }
 };
-
-
-void HelpMenu();
-void DatabaseCommand(string inputToUpper);
-int WordsCounting(string statement);
-void TableCommand(Database currentDatabase);
-
-vector <Database> Database::databaseList;
-int main()
-{
-
-    bool flag = true;
-    while(flag)
-    {
-    cout<<"\n-----------------------------------------------DBMS Console----------------------------------------------\n"<<endl;
-    cout<<"     - Start Querying"<<endl;
-    cout<<"     - Help"<<endl<<endl;;
-    string input;
-    getline(cin,input);
-    string inputToUpper;
-    for(int i = 0; i <input.length();i++)
-    {
-        string ch;
-        ch += toupper(input[i]);
-         inputToUpper.append(ch);
-    }
-    DatabaseCommand(inputToUpper);
-    system("cls");
-    }
-
-
-    return 0;
-}
-void HelpMenu()
-{
-    system("cls");
-    cout<<"\n---------------------------------Query Options-------------------------------------------\n"<<endl;
-
-    cout<<"----------->Database Query"<<endl;
-    cout<<"To Create Database  :  \'CREATE DATABASE [DATABASE NAME] \'"<<endl;
-    cout<<"To Drop Database    :  \'DROP DATABASE [DATABASE NAME] \'"<<endl;
-    cout<<"To Alter Database   :  \'ALTER DATABASE [DATABASE NAME] \'"<<endl;
-    cout<<"To Display Database :  \'SELECT DATABASE\'"<<endl;
-    cout<<endl;
-
-    cout<<"----------->Table Query"<<endl;
-    cout<<"To Create Table  :    \' CREATE TABLE [TABLE NAME] \'"<<endl;
-    cout<<"To Drop Table    :    \' DROP TABLE [TABLE NAME] \'"<<endl;
-    cout<<"To Alter Table   :    \' ALTER TABLE [TABLE NAME] \'"<<endl;
-    cout<<"To Display Table :    \' SELECT TABLE \'"<<endl;
-    cout<<"===================================================="<<endl;
-    cout<<"Press any key to return"<<endl;
-    getch();
-}
-void DatabaseCommand(string inputToUpper)
-{
-    if(inputToUpper.find("CREATE DATABASE") == 0 && WordsCounting(inputToUpper) == 3)
-    {
-        string _name = inputToUpper.substr(16);
-        if(Database::DatabaseNameSearching(_name) == false)
-        {
-            system("cls");
-            Database newDatabase (_name) ;
-            Database::databaseList.push_back(newDatabase);
-        }
-        else
-        {
-            system("cls");
-            cout<<"There is Database with the same name"<<endl;
-            cout<<"Enter any key to return"<<endl;
-            getch();
-        }
-    }
-    else if(inputToUpper.find("SELECT DATABASE") == 0 && WordsCounting(inputToUpper) == 2)
-    {
-        if(!Database::databaseList.empty())
-        {
-            Database::ShowDatabase();
-            cout<<"\n\n---------------------------"<<endl;
-            cout<<"Enter any key to return"<<endl;
-            getch();
-        }
-        else
-        {
-            system("cls");
-            cout<<"No Database Exists"<<endl;
-            cout<<"Enter any key to return"<<endl;
-            getch();
-        }
-
-    }
-    else if(inputToUpper.find("ALTER DATABASE") == 0 && WordsCounting(inputToUpper) == 3)
-    {
-        string databaseName;
-        databaseName = inputToUpper.substr(15);
-        if(Database::DatabaseNameSearching(databaseName))
-        {
-            Database currentDatabase = Database::SearchedDatabase(databaseName);
-            TableCommand(currentDatabase);
-            getch();
-        }
-        else
-        {
-            system("cls");
-            cout<<"There is no Database with name : "<<databaseName<<endl;
-            cout<<"Enter any key to return"<<endl;
-            getch();
-        }
-    }
-    else if(inputToUpper.find("DROP DATABASE") == 0 && WordsCounting(inputToUpper) == 3 )
-    {
-        string databaseName;
-        databaseName = inputToUpper.substr(14);
-        if(Database::DatabaseNameSearching(databaseName))
-        {
-            Database::DeleteDatabase(databaseName);
-        }
-        else
-        {
-            system("cls");
-            cout<<"There is no Database with name : "<<databaseName<<endl;
-            cout<<"Enter any key to return"<<endl;
-            getch();
-        }
-    }
-    else if(inputToUpper.compare("HELP") == 0)
-            HelpMenu();
-    else
-    {
-        cout<<"Invalid Command"<<endl;
-        getch();
-    }
-}
-void TableCommand(Database currentDatabase)
-{
-    bool flag = true;
-    while(flag)
-    {
-        system("cls");
-        cout<<"\n-----------------------------------------------Table Command Prompt----------------------------------------------\n"<<endl;
-        cout<<"     -Enter Query "<<endl;
-        cout<<"     -Return "<<endl;
-        string input;
-        getline(cin,input);
-        string inputToUpper;
-        for(int i = 0; i <input.length();i++)
-        {
-            string ch;
-            ch += toupper(input[i]);
-                inputToUpper.append(ch);
-        }
-        if(inputToUpper.find("CREATE TABLE") == 0 && WordsCounting(inputToUpper) == 3)
-        {
-            string tableName = inputToUpper.substr(12);
-            // if there is a table with same name
-            Table table (tableName);
-            currentDatabase.tableList.push_back(table);
-            getch();
-        }
-        else if(inputToUpper.find("SELECT TABLE") == 0 && WordsCounting(inputToUpper) == 2)
-        {
-            system("cls");
-            string tableName = inputToUpper.substr(12);
-            currentDatabase.ShowTable();
-            getch();
-        }
-        else if(inputToUpper.find("ALTER TABLE") == 0 && WordsCounting(inputToUpper) == 3)
-        {
-            string tableName = inputToUpper.substr(11);
-            Table table = Database::SearchedTable(tableName,currentDatabase);
-
-            if(inputToUpper.find("ADD COLUMN") == 0 && WordsCounting(inputToUpper) == 3)
-            {
-                string columnName = inputToUpper.substr(10);
-                table.AddingColumn(columnName);
-            }
-            else if(inputToUpper.find("DROP COLUMN") == 0 && WordsCounting(inputToUpper) == 3)
-            {
-                string columnName = inputToUpper.substr(11);
-                table.DeleteColumn(columnName);
-            }
-        }
-
-        else if(inputToUpper.find("DROP TABLE") == 0 && WordsCounting(inputToUpper) == 3)
-        {
-            system("cls");
-            string tableName = inputToUpper.substr(10);
-            if(currentDatabase.TableNameSearching(tableName))
-            {
-                Database::DeleteTable(tableName,currentDatabase);
-                getch();
-            }
-            else
-            {
-                system("cls");
-                cout<<"There is no Table with name : "<<tableName<<endl;
-                cout<<"Enter any key to return"<<endl;
-                getch();
-            }
-
-        }
-        else if(inputToUpper.compare("RETURN"))
-            flag = false;
-        else
-            cout<<"Invalid Query"<<endl;
-        }
-
-
-}
+//Utility Functions
 int WordsCounting(string statement)
 {
     int count = 0;
@@ -339,5 +148,254 @@ int WordsCounting(string statement)
     }
     return ++count;
 }
+void ErrorScreen(string errorMessage)
+{
+    system("cls");
+    cout<<errorMessage<<endl;
+    cout<<"Enter any key to return"<<endl;
+    getch();
+}
+void HelpMenu()
+{
+    system("cls");
+    cout<<"\n---------------------------------Query Options-------------------------------------------\n"<<endl;
+
+    cout<<"----------->Database Query"<<endl;
+    cout<<"To Create Database  :  \'CREATE DATABASE [DATABASE NAME] \'"<<endl;
+    cout<<"To Drop Database    :  \'DROP DATABASE [DATABASE NAME] \'"<<endl;
+    cout<<"To Display Database :  \'SHOW DATABASES\'"<<endl;
+    cout<<endl;
+
+    cout<<"----------->Table Query"<<endl;
+    cout<<"To Create Table of Database      :    \' USING DATABASE [DATABASE NAME] CREATE TABLE [TABLE NAME] \'"<<endl;
+    cout<<"To Drop Table  of Database       :    \' USING DATABASE [DATABASE NAME] DROP TABLE [TABLE NAME] \'"<<endl;
+    cout<<"To Add Column to Table           :    \'USING DATABASE [DATABASE NAME] ALTER TABLE [TABLE NAME] ADD COLUMN [NAME]\'"<<endl;
+    cout<<"To DELETE Column to Table        :    \'USING DATABASE [DATABASE NAME] ALTER TABLE [TABLE NAME] DELETE COLUMN [NAME]\'"<<endl;
+    cout<<"To Display Tables Of Database    :    \' USING DATABASE [DATABASE NAME] SHOW TABLES \'"<<endl;
+    cout<<"===================================================="<<endl;
+    cout<<"Press any key to return"<<endl;
+    getch();
+}
+
+void Heading()
+{
+    system("cls");
+    cout<<"\t\t\t\t\t      ****************************"<<endl;
+    cout<<"------------------------------------------------------DBMS Console------------------------------------------------------\n"<<endl;
+    cout<<"     - Start Querying"<<endl;
+    cout<<"     - Help"<<endl;
+    cout<<"     - Exit"<<endl<<endl;
+}
+vector <Database> Database::databaseList;
+void ConsoleCommand()
+{
+    Heading();
+    bool flag = true;
+    while(flag)
+    {
+        string input;
+        getline(cin,input);
+        string originalInput = input;
+        transform(input.begin(),input.end(),input.begin(),::toupper);
+        if(input.find("CREATE DATABASE") == 0 && WordsCounting(input) == 3)
+        {
+            string databaseName =  originalInput.substr(16);
+            if(Database::DatabaseNameSearching(databaseName) == false)
+            {
+                Database newDatabase (databaseName) ;
+                Database::databaseList.push_back(newDatabase);
+            }
+            else
+            {
+                ErrorScreen("Can't Have Duplicated Database");
+                Heading();
+            }
+
+        }
+        else if(input.find("SHOW DATABASES") == 0 && WordsCounting(input) == 2)
+        {
+            if(!Database::databaseList.empty())
+            {
+                Database::ShowDatabase();
+                Heading();
+            }
+            else
+            {
+                ErrorScreen("No Database Exists");
+                Heading();
+            }
+        }
+        else if(input.find("DROP DATABASE") == 0 && WordsCounting(input) == 3 )
+        {
+            string databaseName = originalInput.substr(14);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                Database::DeleteDatabase(databaseName);
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
+        }
+        else if(input.find("USING DATABASE") == 0 && input.find("CREATE TABLE") != string::npos && WordsCounting(input) == 6)
+        {
+            string databaseName = originalInput.substr(15,input.find("CREATE TABLE") - 16);
+            string tableName = originalInput.substr(input.find("CREATE TABLE") + 13);
+            Database *currentDatabase = Database::SearchedDatabase(databaseName);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                if(!currentDatabase->TableNameSearching(tableName))
+                {
+                    Table table(tableName);
+                    currentDatabase->tableList.push_back(table);
+                }
+                else
+                {
+                    ErrorScreen("Can't Have Duplicate Table");
+                    Heading();
+                }
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
 
 
+        }
+        else if(input.find("USING DATABASE") == 0 && input.find("SHOW TABLES") != string::npos && WordsCounting(input) == 5)
+        {
+
+            string databaseName = originalInput.substr(15,input.find("SHOW TABLE") - 16);
+            Database *currentDatabase = Database::SearchedDatabase(databaseName);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                system("cls");
+                currentDatabase->ShowTable();
+                getch();
+                Heading();
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
+
+        }
+        else if(input.find("USING DATABASE") == 0 && input.find("DROP TABLE") != string::npos && WordsCounting(input) == 6)
+        {
+            string databaseName = originalInput.substr(15,input.find("DROP TABLE") - 16);
+            string tableName = originalInput.substr(input.find("DROP TABLE") + 11);
+            Database *currentDatabase = Database::SearchedDatabase(databaseName);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                if(currentDatabase->TableNameSearching(tableName))
+                {
+                    currentDatabase->DeleteTable(tableName);
+                    getch();
+                }
+                else
+                {
+                    ErrorScreen("No Table With This Name Exists");
+                    Heading();
+                }
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
+        }
+        else if(input.find("USING DATABASE") == 0 && input.find("ALTER TABLE") != string::npos
+                && input.find("ADD COLUMN")!= string::npos && WordsCounting(input) == 9)
+        {
+            string databaseName = originalInput.substr(15,input.find("ALTER TABLE") - 16);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                string tableName = originalInput.substr(input.find("ALTER TABLE") + 12);
+                string usedToCutText = tableName;
+                transform(usedToCutText.begin(),usedToCutText.end(),usedToCutText.begin(),::toupper);
+                tableName.erase(usedToCutText.find("ADD COLUMN") - 1);
+                Database *currentDatabase = Database::SearchedDatabase(databaseName);
+                if(currentDatabase->TableNameSearching(tableName))
+                {
+                    Table *currentTable = currentDatabase->SearchedTable(tableName);
+                    string columnName = originalInput.substr(input.find("ADD COLUMN") + 11);
+                    if(!currentTable->ColumnNameSearching(columnName))
+                    {
+                        currentTable->AddingColumn(columnName);
+                    }
+                    else
+                    {
+                        ErrorScreen("Can't Have Duplicate Column");
+                        Heading();
+                    }
+                }
+                else
+                {
+                    ErrorScreen("No Table With This Name Exists");
+                    Heading();
+                }
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
+        }
+        else if(input.find("USING DATABASE") == 0 && input.find("ALTER TABLE") != string::npos
+        && input.find("DELETE COLUMN")!= string::npos && WordsCounting(input) == 9 )
+        {
+            string databaseName = originalInput.substr(15,input.find("ALTER TABLE") - 16);
+            Database *currentDatabase = Database::SearchedDatabase(databaseName);
+            if(Database::DatabaseNameSearching(databaseName))
+            {
+                string tableName = originalInput.substr(input.find("ALTER TABLE") + 12);
+                string usedToCutText = tableName;
+                transform(usedToCutText.begin(),usedToCutText.end(),usedToCutText.begin(),::toupper);
+                tableName.erase(usedToCutText.find("DELETE COLUMN") - 1);
+                if(currentDatabase->TableNameSearching(tableName))
+                {
+                    Table *currentTable = currentDatabase->SearchedTable(tableName);
+                    string columnName = originalInput.substr(input.find("DELETE COLUMN") + 13);
+                    if(currentTable->ColumnNameSearching(columnName))
+                    {
+                        currentTable->DeleteColumn(columnName);
+                    }
+                    else
+                    {
+                        ErrorScreen("No Column With This Name Exists");
+                        Heading();
+                    }
+                }
+                else
+                {
+                    ErrorScreen("No Table With This Name Exists");
+                    Heading();
+                }
+
+            }
+            else
+            {
+                ErrorScreen("No Database With This Name Exists");
+                Heading();
+            }
+        }
+        else if(input.compare("HELP") == 0)
+        {
+            HelpMenu();
+            Heading();
+        }
+        else if(input.compare("EXIT") == 0)
+            flag = false;
+        else
+            cout<<"Wrong Query"<<endl;
+    }
+
+}
+int main()
+{
+    ConsoleCommand();
+    return 0;
+}
